@@ -1,0 +1,33 @@
+# ROMs comerciais (direitos autorais): nunca versionar
+roms/
+
+# Conteudo publico distribuivel: versionar (roms_pub/ e seu .gitkeep ficam)
+!roms_pub/
+!roms_pub/.gitkeep
+
+# Artefatos de build Tizen
+.buildResult/
+*.wgt
+*.manifest.tmp
+
+# Certificados e senhas
+*.p12
+*.pwd
+Certificado/
+
+# Caches e temporarios
+*.bak
+*_backup.*
+
+# Catalogo privado (decisao B): roms.json e privado; roms_pub.json e publico
+roms.json
+
+# Assets de referencia (origem de banco) e arquivos de trabalho: nao publicar
+img/602e8de2ec03b606752b3da7_Dimensions-Digital-Video-Game-Controllers-SNES-Controller.svg
+img/Snes_control.jpg
+img/joy_snes.jpg
+img/joy_snes_base.jpg
+img/auxiliares/
+# Docs internos de desenvolvimento
+INVENTARIO-UNIFICACAO.md
+ACEITACAO-POR-JOGO.md

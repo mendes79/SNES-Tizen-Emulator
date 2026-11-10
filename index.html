@@ -1,0 +1,792 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' data: blob: filesystem:;">
+<title>Super Nintendo (snes9x2002 + HonestHUD) - lilauncher</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;width:100vw;height:100vh;overflow:hidden;background:#000;
+    font-family:-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:#f3ead9}
+
+  /* ===== Tela de selecao sobre o wallpaper ===== */
+  #selscreen{position:fixed;top:0;right:0;bottom:0;left:0;width:100vw;height:100vh;z-index:10;
+    background:#000 url("img/tv_snes.jpg") center center no-repeat;background-size:100% 100%;display:block}
+
+  /* Area branca da tela da TV desenhada (medida no wallpaper, com recuo das bordas curvas) */
+  #tvscreen{position:fixed;left:30%;top:9%;width:40%;height:46%;
+    display:flex;flex-direction:column;align-items:stretch;justify-content:center;overflow:hidden}
+
+  #gamelist{display:flex;flex-direction:column;align-items:stretch;justify-content:center;width:100%;height:100%}
+  .grow{font-family:"Consolas","Courier New",monospace;color:#161616;font-weight:700;
+    text-align:center;line-height:1.32;font-size:3.3vh;letter-spacing:.3px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 2%}
+  .grow.sel{background:#5bd634;color:#0a0a0a;border-radius:4px}
+
+  .scrollind{position:absolute;left:0;right:0;text-align:center;color:#5bd634;font-size:3.0vh;font-weight:700;pointer-events:none;text-shadow:0 1px 3px rgba(0,0,0,.35)}
+  #indUp{top:1%}
+  #indDown{bottom:1%}
+  .scrollind.off{display:none}
+
+  /* Engrenagem no canto superior direito do WALLPAPER */
+  #gear{position:fixed;top:2.6vh;right:2.6vw;width:6.2vh;height:6.2vh;z-index:12;
+    display:flex;align-items:center;justify-content:center;border-radius:50%;
+    background:rgba(0,0,0,.35);transition:transform .12s ease, background .12s ease, box-shadow .12s ease}
+  #gear svg{width:70%;height:70%;display:block}
+  #gear .gpath{fill:#e9e9e9;transition:fill .12s ease}
+  #gear.focus{transform:scale(1.22);background:rgba(10,10,10,.85);
+    box-shadow:0 0 0 3px #5bd634, 0 0 18px 4px rgba(91,214,52,.8)}
+  #gear.focus .gpath{fill:#5bd634}
+
+  /* Dica discreta sobre a area de madeira (abaixo da TV) */
+  /* Legenda em forma de folha de caderno pautada sobre a mesa (esquerda do console) */
+  #hint{position:fixed;left:3vw;bottom:2.5vh;z-index:11;width:29vw;max-width:440px;
+    padding:1.6vh 1.6vw 1.7vh 3.8vw;box-sizing:border-box;overflow:hidden;
+    color:#223040;font-size:2.45vh;line-height:3.35vh;font-weight:600;
+    font-family:"Comic Sans MS","Marker Felt","Segoe Print","Trebuchet MS",sans-serif;
+    background-color:#fcfbf2;
+    background-image:repeating-linear-gradient(to bottom, transparent 0, transparent 3.05vh, #a9c9ec 3.05vh, #a9c9ec 3.35vh);
+    border-radius:3px;
+    box-shadow:0 13px 26px rgba(0,0,0,.5), 0 2px 5px rgba(0,0,0,.35), inset 0 0 0 1px rgba(0,0,0,.05);
+    transform:rotate(-3.5deg)}
+  #hint::before{content:"";position:absolute;top:0;bottom:0;left:2.6vw;width:2px;background:rgba(206,86,86,.7)}
+  #hint b{color:#1a4fa0}
+
+  /* ===== Menu de Configuracoes ===== */
+  #settings{position:fixed;top:0;right:0;bottom:0;left:0;width:100vw;height:100vh;z-index:30;
+    display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.72)}
+  #setbox{width:52vw;max-width:720px;background:linear-gradient(160deg,#20242b,#12151a);
+    border:1px solid #39414d;border-radius:14px;padding:3vh 3vw;box-shadow:0 20px 60px rgba(0,0,0,.6)}
+  #settitle{font-size:3.0vh;font-weight:700;color:#f3ead9;margin:0 0 2.2vh;letter-spacing:1px;text-align:center}
+  .setrow{display:flex;align-items:center;justify-content:space-between;
+    padding:1.6vh 1.6vw;border-radius:10px;margin-bottom:1.2vh;border:1px solid transparent}
+  .setrow .lab{font-size:2.4vh;color:#dfe5ee}
+  .setrow .val{font-size:2.4vh;color:#9fb0c6;font-weight:700;min-width:12vw;text-align:right}
+  .setrow.sel{background:rgba(91,214,52,.14);border-color:#5bd634}
+  .setrow.sel .val{color:#5bd634}
+  .setrow.disabled .lab,.setrow.disabled .val{color:#6b7078}
+  #sethint{margin-top:2.2vh;text-align:center;color:#8a93a1;font-size:1.8vh;line-height:1.5}
+  #sethint b{color:#5bd634}
+
+  /* ===== Tela de Configuracao de Joystick ===== */
+  #joycfg{position:fixed;top:0;right:0;bottom:0;left:0;width:100vw;height:100vh;z-index:40;
+    display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.92)}
+  #joybox{width:96vw;max-width:1320px;text-align:center}
+  #joytitle{color:#f3ead9;font-size:3.4vh;font-weight:700;margin:0 0 2.8vh;letter-spacing:.5px}
+  #joywrap{display:flex;align-items:center;justify-content:center;gap:4.5vw}
+  #joydiagram{position:relative;display:inline-block;width:48vw;max-width:660px;flex:0 0 auto}
+  #joydiagram img{display:block;width:100%;height:auto}
+  .joyov{position:absolute;top:0;left:0;width:100%;display:none;pointer-events:none}
+  #joypanel{width:42vw;max-width:560px;text-align:left}
+  #joytable{display:flex;flex-wrap:wrap}
+  .jrow{width:50%;display:flex;justify-content:space-between;align-items:center;padding:1.05vh 1.1vw;font-size:2.5vh;border-bottom:1px solid rgba(255,255,255,.08)}
+  .jrow.cur{background:rgba(91,214,52,.22);border-radius:5px}
+  .jl{color:#b7c1cf} .jv{color:#9fd98a;font-weight:700;margin-left:.8vw}
+  #joystatus{margin:2.4vh 0 2vh;color:#f0d94a;font-size:2.35vh;min-height:3vh;line-height:1.4}
+  #joyactions{display:flex;gap:1.6vw}
+  .jbtn{padding:1.4vh 2.8vw;border:2px solid #39414d;border-radius:10px;color:#dfe5ee;font-weight:700;font-size:2.5vh;background:rgba(255,255,255,.05)}
+  .jbtn.focus{border-color:#5bd634;background:rgba(91,214,52,.22);color:#eafbe4}
+  #joyhint{margin-top:2vh;color:#959fad;font-size:2.0vh;line-height:1.5}
+  #joyhint b{color:#5bd634}
+
+  /* ===== Estagio de jogo em tela cheia 4:3 escalado por GPU (Chromium M85) ===== */
+  #gamestage{position:fixed;top:0;right:0;bottom:0;left:0;width:100vw;height:100vh;
+    display:none;align-items:center;justify-content:center;background:#000;z-index:20}
+  #lcd{position:absolute;top:0;right:0;bottom:0;left:0;margin:auto;height:100vh;
+    width:calc(100vh * 4 / 3);max-width:100vw;max-height:calc(100vw * 3 / 4);
+    image-rendering:pixelated;will-change:transform;background:#000;display:block}
+</style>
+</head>
+<body>
+  <div id="selscreen">
+    <div id="tvscreen">
+      <div id="indUp" class="scrollind off">&#9650;</div>
+      <div id="gamelist"></div>
+      <div id="indDown" class="scrollind off">&#9660;</div>
+    </div>
+    <div id="gear" title="Configuracoes">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path class="gpath" d="M19.14 12.94a7.49 7.49 0 0 0 .05-.94 7.49 7.49 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.61-.22l-2.39.96a7.3 7.3 0 0 0-1.62-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 0 0-.61.22L2.26 8.2a.5.5 0 0 0 .12.64l2.03 1.58c-.03.31-.05.62-.05.94 0 .32.02.63.05.94L2.38 15.4a.5.5 0 0 0-.12.64l1.92 3.32c.14.24.42.33.61.22l2.39-.96c.49.38 1.03.7 1.62.94l.36 2.54c.05.24.26.42.5.42h3.84c.24 0 .45-.18.5-.42l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.24.09.5 0 .61-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58zM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2z"/></svg>
+    </div>
+    <div id="hint">
+      <b>&#9650; &#9660;</b> navegar<br>
+      <b>&#9658;</b> engrenagem<br>
+      <b>OK / A</b> abre<br>
+      <b>SELECT</b> configuracoes<br>
+      <b>Voltar / SELECT + START</b> sai
+    </div>
+  </div>
+
+  <div id="settings">
+    <div id="setbox">
+      <div id="settitle">Configuracoes</div>
+      <div class="setrow" data-k="joy"><span class="lab">Configurar Joystick</span><span class="val">abrir &#8250;</span></div>
+      <div class="setrow" data-k="sound"><span class="lab">Som</span><span class="val" id="valSound">LIGADO</span></div>
+      <div class="setrow" data-k="speed"><span class="lab">Velocidade</span><span class="val" id="valSpeed">100%</span></div>
+      <div id="sethint"><b>&#9650; &#9660;</b> seleciona &middot; <b>&#8249; &#8250; / A</b> altera &middot; <b>Voltar / B</b> volta</div>
+    </div>
+  </div>
+
+  <div id="joycfg">
+    <div id="joybox">
+      <div id="joytitle">Configurar Joystick</div>
+      <div id="joywrap">
+        <div id="joydiagram">
+          <img id="joybase" src="img/joy_snes.png" alt="">
+          <img class="joyov" id="ov_up" src="img/overlays/ov_up.png" alt="">
+          <img class="joyov" id="ov_down" src="img/overlays/ov_down.png" alt="">
+          <img class="joyov" id="ov_left" src="img/overlays/ov_left.png" alt="">
+          <img class="joyov" id="ov_right" src="img/overlays/ov_right.png" alt="">
+          <img class="joyov" id="ov_a" src="img/overlays/ov_a.png" alt="">
+          <img class="joyov" id="ov_b" src="img/overlays/ov_b.png" alt="">
+          <img class="joyov" id="ov_x" src="img/overlays/ov_x.png" alt="">
+          <img class="joyov" id="ov_y" src="img/overlays/ov_y.png" alt="">
+          <img class="joyov" id="ov_l" src="img/overlays/ov_l.png" alt="">
+          <img class="joyov" id="ov_r" src="img/overlays/ov_r.png" alt="">
+          <img class="joyov" id="ov_select" src="img/overlays/ov_select.png" alt="">
+          <img class="joyov" id="ov_start" src="img/overlays/ov_start.png" alt="">
+        </div>
+        <div id="joypanel">
+          <div id="joytable">
+            <div class="jrow" id="row_up"><span class="jl">Cima</span><span class="jv" id="map_up"></span></div>
+            <div class="jrow" id="row_down"><span class="jl">Baixo</span><span class="jv" id="map_down"></span></div>
+            <div class="jrow" id="row_left"><span class="jl">Esquerda</span><span class="jv" id="map_left"></span></div>
+            <div class="jrow" id="row_right"><span class="jl">Direita</span><span class="jv" id="map_right"></span></div>
+            <div class="jrow" id="row_b"><span class="jl">B</span><span class="jv" id="map_b"></span></div>
+            <div class="jrow" id="row_a"><span class="jl">A</span><span class="jv" id="map_a"></span></div>
+            <div class="jrow" id="row_y"><span class="jl">Y</span><span class="jv" id="map_y"></span></div>
+            <div class="jrow" id="row_x"><span class="jl">X</span><span class="jv" id="map_x"></span></div>
+            <div class="jrow" id="row_l"><span class="jl">L</span><span class="jv" id="map_l"></span></div>
+            <div class="jrow" id="row_r"><span class="jl">R</span><span class="jv" id="map_r"></span></div>
+            <div class="jrow" id="row_start"><span class="jl">Start</span><span class="jv" id="map_start"></span></div>
+            <div class="jrow" id="row_select"><span class="jl">Select</span><span class="jv" id="map_select"></span></div>
+          </div>
+          <div id="joystatus"></div>
+          <div id="joyactions">
+            <div class="jbtn" id="btn_iniciar">INICIAR</div>
+            <div class="jbtn" id="btn_ok">OK</div>
+            <div class="jbtn" id="btn_reset">RESET</div>
+          </div>
+          <div id="joyhint"><b>&#8249; &#8250;</b> move &middot; <b>A</b> ativa &middot; no INICIAR, <b>Select+Start</b> pula &middot; <b>Voltar</b> fecha</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="gamestage">
+    <canvas id="lcd" width="256" height="224"></canvas>
+  </div>
+
+<script>
+  if (typeof globalThis === "undefined") { window.globalThis = window; }
+</script>
+<script src="js/hud.js"></script>
+<script src="js/snes9x2002.js"></script>
+<script src="js/adapter-snes.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  var selScreen = document.getElementById("selscreen");
+  var settingsEl = document.getElementById("settings");
+  var stageEl = document.getElementById("gamestage");
+  var canvas = document.getElementById("lcd");
+  var ctx = canvas.getContext("2d", { alpha: false });
+  var listEl = document.getElementById("gamelist");
+  var indUp = document.getElementById("indUp"), indDown = document.getElementById("indDown");
+  var gearEl = document.getElementById("gear");
+  var valSound = document.getElementById("valSound"), valSpeed = document.getElementById("valSpeed");
+  var joycfgEl = document.getElementById("joycfg");
+
+  var list = [], idx = 0;
+  var IDX_KEY = "snescore.lastIdx";
+  var SOUND_KEY = "snescore.sound";
+  var SPEED_KEY = "snescore.speedIdx";
+
+  var mode = "carousel";       // "carousel" | "game"
+  var selView = "list";        // dentro de carousel: "list" | "settings"
+  var focusZone = "list";      // dentro de list: "list" | "gear"
+  var setIdx = 1;              // item selecionado em Configuracoes (0=joy,1=sound,2=speed)
+  var SET_ITEMS = ["joy","sound","speed"];
+  var VISROWS = 10;            // linhas visiveis na "tela" da TV
+
+  var activeAdapter = null;
+  var availableEngines = Object.keys(window.CoreAdapters || {});
+  var engineIdx = 0;
+
+  // Presets de velocidade (reducao de cadencia como no Atari)
+  var SPEED_PRESETS = [
+    { scale: 1.00, label: "100%" },
+    { scale: 0.94, label: "-6%" },
+    { scale: 0.92, label: "-8%" },
+    { scale: 0.90, label: "-10%" }
+  ];
+  var speedIdx = 0;
+  var soundEnabled = true;
+
+  // Carrega preferencias persistidas
+  try {
+    var ss = localStorage.getItem(SOUND_KEY);
+    if (ss !== null) soundEnabled = (ss === "1");
+    var sp = parseInt(localStorage.getItem(SPEED_KEY), 10);
+    if (!isNaN(sp) && sp >= 0 && sp < SPEED_PRESETS.length) speedIdx = sp;
+  } catch (e) {}
+
+  function currentSpeedScale(){ return SPEED_PRESETS[speedIdx].scale; }
+
+  function currentAdapter() {
+    availableEngines = Object.keys(window.CoreAdapters || {});
+    if (!availableEngines.length) return null;
+    if (engineIdx >= availableEngines.length) engineIdx = 0;
+    return window.CoreAdapters[availableEngines[engineIdx]];
+  }
+
+  if (window.tizen && tizen.tvinputdevice) {
+    ["Back","MediaPlayPause","MediaPlay","MediaPause","ColorF0Red","ColorF1Green","ColorF2Yellow","ColorF3Blue"].forEach(function(k){
+      try { tizen.tvinputdevice.registerKey(k); } catch(e) {}
+    });
+  }
+
+  // ===== Audio: ScriptProcessorNode ESTEREO (2 canais) + GainNode p/ Som ON/OFF =====
+  var audioCtx = null, audioNode = null, audioGain = null, audioInitialized = false;
+
+  function applyAudioGain() {
+    if (!audioGain) return;
+    try { audioGain.gain.value = (mode === "game" && soundEnabled) ? 1.0 : 0.0; } catch (e) {}
+  }
+
+  function initAudio() {
+    if (audioInitialized) return;
+    try {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      try { audioCtx = new AC({ sampleRate: 44100 }); } catch (e1) { audioCtx = new AC(); }
+      window.__atariAudioCtx = audioCtx;
+      audioNode = audioCtx.createScriptProcessor(2048, 0, 2); // 2 canais de saida (estereo)
+      window.__atariAudioNode = audioNode;
+      audioGain = audioCtx.createGain();
+      audioGain.gain.value = 0.0;
+      window.__atariAudioGain = audioGain;
+      audioNode.onaudioprocess = function(ev) {
+        var outL = ev.outputBuffer.getChannelData(0);
+        var outR = ev.outputBuffer.numberOfChannels > 1 ? ev.outputBuffer.getChannelData(1) : null;
+        if (mode !== "game" || !activeAdapter) {
+          outL.fill(0); if (outR) outR.fill(0); return;
+        }
+        var delivered, avail;
+        if (activeAdapter.getAudioStereo && outR) {
+          delivered = activeAdapter.getAudioStereo(outL, outR);
+        } else {
+          delivered = activeAdapter.getAudio(outL);
+          if (outR) outR.set(outL);
+        }
+        avail = activeAdapter.getAudioAvailable ? activeAdapter.getAudioAvailable() : 0;
+        if (window.HonestHUD) HonestHUD.onAudioCallback(delivered, outL.length, avail);
+      };
+      audioNode.connect(audioGain);
+      audioGain.connect(audioCtx.destination);
+      audioInitialized = true;
+      applyAudioGain();
+    } catch (e) {
+      console.warn("[AUDIO] Falha ao iniciar ScriptProcessor estereo:", e);
+    }
+  }
+
+  function resumeAudio() {
+    if (!audioInitialized) initAudio();
+    if (!audioCtx) return;
+    if (audioCtx.state === "suspended" || audioCtx.state === "interrupted") {
+      try { audioCtx.resume(); } catch (e) {}
+    }
+  }
+  initAudio();
+  document.addEventListener("keydown", resumeAudio, false);
+  document.addEventListener("click", resumeAudio, false);
+
+  // ===== Render da tela de selecao =====
+  function renderList() {
+    listEl.innerHTML = "";
+    if (!list.length) {
+      var d = document.createElement("div"); d.className = "grow"; d.textContent = "Sem ROMs"; listEl.appendChild(d);
+      indUp.classList.add("off"); indDown.classList.add("off"); return;
+    }
+    var first = 0;
+    if (list.length > VISROWS) {
+      first = idx - (VISROWS >> 1);
+      if (first < 0) first = 0;
+      if (first > list.length - VISROWS) first = list.length - VISROWS;
+    }
+    var last = Math.min(first + VISROWS, list.length);
+    for (var i = first; i < last; i++) {
+      var row = document.createElement("div");
+      row.className = "grow" + (i === idx && focusZone === "list" ? " sel" : "");
+      row.textContent = list[i].name;
+      listEl.appendChild(row);
+    }
+    indUp.classList.toggle("off", first <= 0);
+    indDown.classList.toggle("off", last >= list.length);
+  }
+
+  function setFocusGear(on) {
+    focusZone = on ? "gear" : "list";
+    gearEl.classList.toggle("focus", on);
+    renderList();
+  }
+
+  function moveSel(d) {
+    if (!list.length) return;
+    idx = idx + d;
+    if (idx < 0) idx = 0;
+    if (idx > list.length - 1) idx = list.length - 1;
+    renderList();
+  }
+
+  // ===== Menu de Configuracoes =====
+  function fmtSound(){ return soundEnabled ? "LIGADO" : "DESLIGADO"; }
+  function fmtSpeed(){ return SPEED_PRESETS[speedIdx].label; }
+
+  function renderSettings() {
+    valSound.textContent = fmtSound();
+    valSpeed.textContent = fmtSpeed();
+    var rows = settingsEl.querySelectorAll(".setrow");
+    for (var i = 0; i < rows.length; i++) {
+      rows[i].classList.toggle("sel", i === setIdx);
+    }
+  }
+
+  function openSettings() {
+    selView = "settings";
+    setIdx = 1;
+    settingsEl.style.display = "flex";
+    renderSettings();
+  }
+  function closeSettings() {
+    selView = "list";
+    settingsEl.style.display = "none";
+    setFocusGear(false);
+  }
+
+  function settingsMove(d) {
+    setIdx = (setIdx + d + SET_ITEMS.length) % SET_ITEMS.length;
+    renderSettings();
+  }
+  function settingsAdjust(d) {
+    var k = SET_ITEMS[setIdx];
+    if (k === "sound") {
+      soundEnabled = !soundEnabled;
+      try { localStorage.setItem(SOUND_KEY, soundEnabled ? "1" : "0"); } catch (e) {}
+      applyAudioGain();
+    } else if (k === "speed") {
+      speedIdx = (speedIdx + d + SPEED_PRESETS.length) % SPEED_PRESETS.length;
+      try { localStorage.setItem(SPEED_KEY, String(speedIdx)); } catch (e) {}
+      var ad = currentAdapter();
+      if (ad && ad.setSpeedScale) ad.setSpeedScale(currentSpeedScale());
+    }
+    renderSettings();
+  }
+  function setOv(id, on){ var e=document.getElementById(id); if(e) e.style.display = on ? "block" : "none"; }
+  var OV_IDS = ["ov_up","ov_down","ov_left","ov_right","ov_a","ov_b","ov_x","ov_y","ov_l","ov_r","ov_select","ov_start"];
+  function clearOverlays(){ OV_IDS.forEach(function(i){ setOv(i,false); }); }
+
+  // ===== Mapeamento de joystick (Fase 2b) =====
+  var CMD_LIST = ["up","down","left","right","b","a","y","x","l","r","select","start"];
+  var CMD_LABEL = {up:"Cima",down:"Baixo",left:"Esquerda",right:"Direita",b:"B",a:"A",y:"Y",x:"X",l:"L",r:"R",select:"Select",start:"Start"};
+  var WIZ_ORDER = ["up","left","down","right","b","a","y","x","l","r","start","select"];
+  var JOY_ACTIONS = ["iniciar","ok","reset"];
+  var customMap = null;
+  try { var _cm = localStorage.getItem("snescore.map"); if (_cm) customMap = JSON.parse(_cm); } catch(e){}
+  var keyHeld = {};
+  var wizActive=false, wizIdx=0, pendingMap=null, wizWaitRelease=false, wizKeyLock=false, joyFocusIdx=0;
+
+  function evalDesc(desc, pad, b){
+    if(!desc) return false;
+    if(desc.t==="btn") return !!(b[desc.i] && b[desc.i].pressed);
+    if(desc.t==="axis"){ var v=(pad && pad.axes && pad.axes[desc.a])||0; return desc.d>0 ? v>0.35 : v<-0.35; }
+    if(desc.t==="key") return !!keyHeld[desc.k];
+    return false;
+  }
+  function descLabel(desc){
+    if(desc===undefined) return "—";
+    if(desc===null) return "(sem)";
+    if(desc.t==="btn") return "Botao "+desc.i;
+    if(desc.t==="axis") return "Eixo "+desc.a+(desc.d>0?"+":"-");
+    if(desc.t==="key") return "Tecla "+desc.k;
+    return "?";
+  }
+  function renderJoyTable(){
+    for (var i=0;i<CMD_LIST.length;i++){
+      var c=CMD_LIST[i], el=document.getElementById("map_"+c), row=document.getElementById("row_"+c);
+      if(el){ var txt; if(pendingMap){ txt=(c in pendingMap)?descLabel(pendingMap[c]):"—"; } else if(customMap){ txt=descLabel(customMap[c]); } else { txt="padrao"; } el.textContent=txt; }
+      if(row) row.classList.toggle("cur", wizActive && WIZ_ORDER[wizIdx]===c);
+    }
+    for (var a=0;a<JOY_ACTIONS.length;a++){ var be=document.getElementById("btn_"+JOY_ACTIONS[a]); if(be) be.classList.toggle("focus", !wizActive && joyFocusIdx===a); }
+    var st=document.getElementById("joystatus");
+    if(st){ st.textContent = wizActive ? ("Pressione no controle para: "+CMD_LABEL[WIZ_ORDER[wizIdx]]+"   (Select+Start pula)") : (pendingMap ? "Config capturada. OK salva, RESET volta ao padrao." : "INICIAR configura em sequencia. OK salva, RESET volta ao padrao."); }
+  }
+  function startWizard(){ pendingMap={}; wizActive=true; wizIdx=0; wizWaitRelease=true; wizKeyLock=true; renderJoyTable(); }
+  function wizAssign(desc){ if(!wizActive) return; pendingMap[WIZ_ORDER[wizIdx]]=desc; wizIdx++; if(wizIdx>=WIZ_ORDER.length){ wizActive=false; joyFocusIdx=1; clearOverlays(); } renderJoyTable(); }
+  function wizCancel(){ wizActive=false; clearOverlays(); renderJoyTable(); }
+  function commitMap(){ if(pendingMap){ customMap=pendingMap; try{localStorage.setItem("snescore.map",JSON.stringify(customMap));}catch(e){} pendingMap=null; renderJoyTable(); } }
+  function resetMap(){ customMap=null; pendingMap=null; wizActive=false; try{localStorage.removeItem("snescore.map");}catch(e){} clearOverlays(); renderJoyTable(); }
+  function joyFocus(d){ joyFocusIdx=(joyFocusIdx+d+JOY_ACTIONS.length)%JOY_ACTIONS.length; renderJoyTable(); }
+  function joyActivate(){ var a=JOY_ACTIONS[joyFocusIdx]; if(a==="iniciar") startWizard(); else if(a==="ok") commitMap(); else if(a==="reset") resetMap(); }
+
+  function openJoyCfg(){ selView="joycfg"; wizActive=false; pendingMap=null; joyFocusIdx=0; clearOverlays(); joycfgEl.style.display="flex"; renderJoyTable(); }
+  function closeJoyCfg(){ selView="settings"; wizActive=false; clearOverlays(); joycfgEl.style.display="none"; }
+
+  function settingsActivate() {
+    var k = SET_ITEMS[setIdx];
+    if (k === "sound") settingsAdjust(1);
+    else if (k === "speed") settingsAdjust(1);
+    else if (k === "joy") openJoyCfg();
+  }
+
+  // ===== Carregar / iniciar jogo =====
+  function fetchBinary(url, cb) {
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", url, true);
+    xhr.responseType = "arraybuffer";
+    xhr.onload = function() {
+      if ((xhr.status >= 200 && xhr.status < 300) || (xhr.status === 0 && xhr.response)) cb(null, new Uint8Array(xhr.response));
+      else cb(new Error("HTTP " + xhr.status));
+    };
+    xhr.onerror = function() { cb(new Error("Erro de leitura XHR")); };
+    xhr.send();
+  }
+
+  var frameAccumulator = 0, lastLoopTs = 0;
+
+  function launchSelectedGame() {
+    if (!list.length || mode === "game") return;
+    var it = list[idx];
+    try { sessionStorage.setItem(IDX_KEY, String(idx)); } catch (e) {}
+    resumeAudio();
+
+    var ad = currentAdapter();
+    if (!ad) return;
+    activeAdapter = ad;
+    if (activeAdapter.setSpeedScale) activeAdapter.setSpeedScale(currentSpeedScale());
+    if (window.HonestHUD) HonestHUD.markLoadStart();
+
+    var romUrl = (it.pub ? "roms_pub/" : "roms/") + encodeURIComponent(it.file);
+    fetchBinary(romUrl, function(err, bytes) {
+      if (err || !bytes) { console.error("ROM:", err); return; }
+      if (window.HonestHUD) HonestHUD.markFetchDone(bytes.length);
+      var tInst0 = performance.now();
+      Promise.resolve(activeAdapter.init(bytes, it.file)).then(function() {
+        var tInstMs = performance.now() - tInst0;
+        if (window.HonestHUD) {
+          var lt = activeAdapter.getLoadTimings ? activeAdapter.getLoadTimings() : null;
+          HonestHUD.markCompileDone(lt ? lt.compileMs : 0);
+          HonestHUD.markInstantiateDone(lt ? lt.instantiateMs : tInstMs);
+        }
+        var sz = activeAdapter.getFrameSize ? activeAdapter.getFrameSize() : { width: 256, height: 224 };
+        if (canvas.width !== sz.width || canvas.height !== sz.height) { canvas.width = sz.width; canvas.height = sz.height; }
+        var tfps = activeAdapter.getTargetFps ? activeAdapter.getTargetFps() : 60.0;
+        var stdName = activeAdapter.getVideoStandardName ? activeAdapter.getVideoStandardName() : "NTSC";
+        if (window.HonestHUD) {
+          HonestHUD.init({
+            engine: activeAdapter.name + " [" + stdName + " " + SPEED_PRESETS[speedIdx].label + "]",
+            rom: it.name, targetFps: +(tfps * currentSpeedScale()).toFixed(1), sampleRate: 44100
+          });
+        }
+        selScreen.style.display = "none";
+        settingsEl.style.display = "none";
+        stageEl.style.display = "flex";
+        mode = "game"; selView = "list"; frameAccumulator = 0; lastLoopTs = 0;
+        applyAudioGain();
+      }).catch(function(e) { console.error("[CORE] init:", e); });
+    });
+  }
+
+  function returnToCarousel() {
+    if (mode !== "game") return;
+    mode = "carousel";
+    applyAudioGain();
+    stageEl.style.display = "none";
+    selScreen.style.display = "block";
+    setFocusGear(false);
+  }
+
+  function exitApp() {
+    try { if (window.tizen && tizen.application) tizen.application.getCurrentApplication().exit(); } catch(e) {}
+  }
+
+  // ===== Input de jogo (8BitDo / teclado) =====
+  var SNES_FIELDS = ["up","down","left","right","b","y","a","x","l","r","select","start"];
+  function newState(){ var o={}; for(var i=0;i<SNES_FIELDS.length;i++) o[SNES_FIELDS[i]]=false; return o; }
+  function clearState(o){ for(var i=0;i<SNES_FIELDS.length;i++) o[SNES_FIELDS[i]]=false; }
+  var keyInput = newState(), padInput = newState(), mergedInput = newState();
+
+  function syncInputToAdapter() {
+    if (!activeAdapter || mode !== "game") return;
+    for (var i=0;i<SNES_FIELDS.length;i++){ var f=SNES_FIELDS[i]; mergedInput[f]=!!(keyInput[f]||padInput[f]); }
+    activeAdapter.pushInput(mergedInput);
+  }
+
+  // ===== Teclado / controle remoto =====
+  window.addEventListener("keydown", function(ev) {
+    var k = ev.keyCode;
+    keyHeld[k] = true;
+    resumeAudio();
+
+    if (mode === "carousel") {
+      if (selView === "joycfg") {
+        if (wizActive) {
+          if (k === 10009 || k === 27 || k === 8) { wizCancel(); ev.preventDefault(); return; }
+          if (!wizKeyLock) { wizKeyLock = true; wizAssign({t:"key",k:k}); }
+          ev.preventDefault(); return;
+        }
+        if (k === 10009 || k === 27 || k === 8) { closeJoyCfg(); ev.preventDefault(); return; }
+        if (k === 37) { joyFocus(-1); ev.preventDefault(); }
+        else if (k === 39) { joyFocus(1); ev.preventDefault(); }
+        else if (k === 13 || k === 32) { joyActivate(); ev.preventDefault(); }
+        return;
+      }
+      if (selView === "settings") {
+        if (k === 38) { settingsMove(-1); ev.preventDefault(); }
+        else if (k === 40) { settingsMove(1); ev.preventDefault(); }
+        else if (k === 37) { settingsAdjust(-1); ev.preventDefault(); }
+        else if (k === 39) { settingsAdjust(1); ev.preventDefault(); }
+        else if (k === 13 || k === 32 || k === 88) { settingsActivate(); ev.preventDefault(); }
+        else if (k === 10009 || k === 27 || k === 8 || k === 90) { closeSettings(); ev.preventDefault(); }
+        return;
+      }
+      // selView === "list"
+      if (k === 38) { if (focusZone === "list") moveSel(-1); ev.preventDefault(); }
+      else if (k === 40) { if (focusZone === "list") moveSel(1); ev.preventDefault(); }
+      else if (k === 39) { setFocusGear(true); ev.preventDefault(); }
+      else if (k === 37) { setFocusGear(false); ev.preventDefault(); }
+      else if (k === 13 || k === 32 || k === 10252) {
+        if (focusZone === "gear") openSettings(); else launchSelectedGame();
+        ev.preventDefault();
+      }
+      else if (k === 415 || k === 16) { openSettings(); ev.preventDefault(); } // Select (remoto) -> Configuracoes
+      else if (k === 10009 || k === 27 || k === 8) { exitApp(); ev.preventDefault(); }
+      return;
+    }
+
+    // Modo de jogo
+    if (k === 10009 || k === 27 || k === 8) { ev.preventDefault(); returnToCarousel(); return; }
+    if (k === 38) { keyInput.up = true; ev.preventDefault(); }
+    else if (k === 40) { keyInput.down = true; ev.preventDefault(); }
+    else if (k === 37) { keyInput.left = true; ev.preventDefault(); }
+    else if (k === 39) { keyInput.right = true; ev.preventDefault(); }
+    else if (k === 90) { keyInput.b = true; ev.preventDefault(); }
+    else if (k === 88) { keyInput.a = true; ev.preventDefault(); }
+    else if (k === 65) { keyInput.y = true; ev.preventDefault(); }
+    else if (k === 83) { keyInput.x = true; ev.preventDefault(); }
+    else if (k === 13 || k === 10252) { keyInput.start = true; ev.preventDefault(); }
+    else if (k === 16 || k === 415) { keyInput.select = true; ev.preventDefault(); }
+    syncInputToAdapter();
+  }, false);
+
+  window.addEventListener("keyup", function(ev) {
+    var k = ev.keyCode;
+    keyHeld[k] = false;
+    if (mode === "carousel" && selView === "joycfg") { wizKeyLock = false; return; }
+    if (mode !== "game") return;
+    if (k === 38) keyInput.up = false;
+    else if (k === 40) keyInput.down = false;
+    else if (k === 37) keyInput.left = false;
+    else if (k === 39) keyInput.right = false;
+    else if (k === 90) keyInput.b = false;
+    else if (k === 88) keyInput.a = false;
+    else if (k === 65) keyInput.y = false;
+    else if (k === 83) keyInput.x = false;
+    else if (k === 13 || k === 10252) keyInput.start = false;
+    else if (k === 16 || k === 415) keyInput.select = false;
+    syncInputToAdapter();
+  }, false);
+
+  // Clique do mouse na engrenagem (opcional)
+  gearEl.addEventListener("click", function(){ if (mode === "carousel") { if (selView === "settings") closeSettings(); else openSettings(); } });
+  JOY_ACTIONS.forEach(function(a, ai){ var e=document.getElementById("btn_"+a); if(e) e.addEventListener("click", function(){ if(!wizActive){ joyFocusIdx=ai; joyActivate(); } }); });
+
+  // ===== Gamepad 8BitDo =====
+  var navCooldown = 0;
+  var prevA = false, prevB = false, prevSel = false, prevPadBack = false, prevLR = false;
+
+  function pollGamepad(now) {
+    var pads = navigator.getGamepads ? navigator.getGamepads() : [];
+    var found = false;
+    for (var i = 0; i < pads.length; i++) {
+      var p = pads[i];
+      if (!p) continue;
+      found = true;
+      if (window.HonestHUD) HonestHUD.pollGamepadShortcuts(p);
+
+      var b = p.buttons || [];
+      var ax0 = (p.axes && p.axes[0]) || 0;
+      var ax1 = (p.axes && p.axes[1]) || 0;
+      var up = !!(b[12] && b[12].pressed) || ax1 < -0.35;
+      var down = !!(b[13] && b[13].pressed) || ax1 > 0.35;
+      var left = !!(b[14] && b[14].pressed) || ax0 < -0.35;
+      var right = !!(b[15] && b[15].pressed) || ax0 > 0.35;
+      var btnA = !!(b[0] && b[0].pressed);  // sul
+      var btnB = !!(b[1] && b[1].pressed);  // leste
+      var btnX = !!(b[2] && b[2].pressed);  // oeste
+      var btnY = !!(b[3] && b[3].pressed);  // norte
+      var btnSelect = !!(b[8] && b[8].pressed);
+      var btnStart = !!(b[9] && b[9].pressed);
+      var btnGuide = !!(b[16] && b[16].pressed);
+      var backCombo = (btnSelect && btnStart);
+      var padBack = backCombo || btnGuide;
+
+      if (mode === "carousel") {
+        if (selView === "joycfg") {
+          if (wizActive) {
+            var blinkOn = (Math.floor(now/400)%2)===0;
+            clearOverlays(); setOv("ov_"+WIZ_ORDER[wizIdx], blinkOn);
+            var skip = btnSelect && btnStart;
+            var pb=-1; for (var bi=0; bi<b.length; bi++){ if (b[bi] && b[bi].pressed){ pb=bi; break; } }
+            var axh=null; if (p.axes){ for (var aj=0; aj<p.axes.length; aj++){ var av=p.axes[aj]; if (av>0.6){axh={a:aj,d:1};break;} if (av<-0.6){axh={a:aj,d:-1};break;} } }
+            if (wizWaitRelease){ if (pb<0 && !axh && !skip) wizWaitRelease=false; }
+            else if (skip){ wizWaitRelease=true; wizAssign(null); }
+            else if (pb>=0){ wizWaitRelease=true; wizAssign({t:"btn",i:pb}); }
+            else if (axh){ wizWaitRelease=true; wizAssign({t:"axis",a:axh.a,d:axh.d}); }
+            if (btnGuide && !prevPadBack) wizCancel();
+            prevPadBack = btnGuide; prevA=btnA; prevB=btnB; prevSel=btnSelect;
+            break;
+          }
+          if ((left||right) && now > navCooldown) { joyFocus(right?1:-1); navCooldown = now+220; }
+          else if (!left && !right) { navCooldown = 0; }
+          if (btnA && !prevA) joyActivate();
+          prevA = btnA;
+          if (btnGuide && !prevPadBack) closeJoyCfg();
+          prevPadBack = btnGuide; prevB=btnB; prevSel=btnSelect;
+          break;
+        }
+        if (selView === "settings") {
+          if ((up || down) && now > navCooldown) { settingsMove(up ? -1 : 1); navCooldown = now + 200; }
+          else if ((left || right) && now > navCooldown) { settingsAdjust(left ? -1 : 1); navCooldown = now + 200; }
+          else if (!up && !down && !left && !right) { navCooldown = 0; }
+          if ((btnA) && !prevA) settingsActivate();
+          prevA = btnA;
+          if ((btnB) && !prevB) closeSettings();
+          prevB = btnB;
+          prevSel = btnSelect; prevPadBack = padBack; prevLR = false;
+          break;
+        }
+        // selView === "list"
+        if ((up || down) && now > navCooldown) {
+          if (focusZone === "list") moveSel(up ? -1 : 1);
+          navCooldown = now + 170;
+        } else if ((left || right) && now > navCooldown) {
+          setFocusGear(right ? true : false);
+          navCooldown = now + 220;
+        } else if (!up && !down && !left && !right) {
+          navCooldown = 0;
+        }
+        if (btnA || btnStart) resumeAudio();
+        if ((btnA || btnStart) && !prevA && !padBack) {
+          if (focusZone === "gear") openSettings(); else launchSelectedGame();
+        }
+        prevA = (btnA || btnStart);
+        if (btnSelect && !prevSel && !btnStart) openSettings(); // Select -> Configuracoes
+        prevSel = btnSelect;
+        if (padBack && !prevPadBack) exitApp();
+        prevPadBack = padBack;
+        prevB = btnB;
+      } else {
+        prevA = (btnA || btnStart); prevSel = btnSelect;
+        if (padBack && !prevPadBack) {
+          prevPadBack = true; clearState(padInput); syncInputToAdapter(); returnToCarousel(); break;
+        }
+        prevPadBack = padBack;
+        if (btnA || btnB || btnX || btnY || btnStart || btnSelect || up || down || left || right) resumeAudio();
+        var l1 = !!(b[4] && b[4].pressed);
+        var r1 = !!(b[5] && b[5].pressed);
+        if (customMap) {
+          padInput.up=evalDesc(customMap.up,p,b); padInput.down=evalDesc(customMap.down,p,b);
+          padInput.left=evalDesc(customMap.left,p,b); padInput.right=evalDesc(customMap.right,p,b);
+          padInput.b=evalDesc(customMap.b,p,b); padInput.a=evalDesc(customMap.a,p,b);
+          padInput.y=evalDesc(customMap.y,p,b); padInput.x=evalDesc(customMap.x,p,b);
+          padInput.l=evalDesc(customMap.l,p,b); padInput.r=evalDesc(customMap.r,p,b);
+          padInput.select=evalDesc(customMap.select,p,b) && !backCombo;
+          padInput.start=evalDesc(customMap.start,p,b) && !backCombo;
+        } else {
+          padInput.up = up; padInput.down = down; padInput.left = left; padInput.right = right;
+          padInput.b = btnA; padInput.a = btnB; padInput.y = btnX; padInput.x = btnY;
+          padInput.l = l1; padInput.r = r1;
+          padInput.select = btnSelect && !backCombo;
+          padInput.start  = btnStart  && !backCombo;
+        }
+        syncInputToAdapter();
+      }
+      break;
+    }
+    if (!found && mode === "game") clearState(padInput);
+  }
+
+  // ===== Loop principal =====
+  function mainLoop(now) {
+    pollGamepad(now);
+    if (mode === "game" && activeAdapter) {
+      var baseFps = activeAdapter.getTargetFps ? activeAdapter.getTargetFps() : 60.0;
+      var effectiveFps = baseFps * currentSpeedScale();
+      var stepMs = 1000.0 / effectiveFps;
+      if (!lastLoopTs) { lastLoopTs = now; frameAccumulator = stepMs; }
+      else { var dt = now - lastLoopTs; lastLoopTs = now; if (dt > 100) dt = 100; frameAccumulator += dt; }
+      var ranFrame = false, lastFrameData = null;
+      if (frameAccumulator >= stepMs) {
+        lastFrameData = activeAdapter.runFrame();
+        if (window.HonestHUD) HonestHUD.onEmulatedFrame();
+        ranFrame = true; frameAccumulator -= stepMs;
+        if (frameAccumulator >= stepMs) frameAccumulator = stepMs * 0.5;
+      }
+      if (ranFrame && lastFrameData) {
+        if (canvas.width !== lastFrameData.width || canvas.height !== lastFrameData.height) {
+          canvas.width = lastFrameData.width; canvas.height = lastFrameData.height;
+        }
+        ctx.putImageData(lastFrameData, 0, 0);
+      }
+      if (window.HonestHUD) HonestHUD.onPaintFrame();
+    }
+    requestAnimationFrame(mainLoop);
+  }
+  requestAnimationFrame(mainLoop);
+
+  // ===== Catalogo: mescla roms.json (privado) + roms_pub.json (publico) =====
+  function loadJson(url, cb) {
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", url, true);
+    xhr.onload = function() {
+      if ((xhr.status >= 200 && xhr.status < 300) || (xhr.status === 0 && xhr.responseText)) {
+        try { cb(null, JSON.parse(xhr.responseText)); } catch (e) { cb(e); }
+      } else cb(new Error("HTTP " + xhr.status));
+    };
+    xhr.onerror = function() { cb(new Error("XHR")); };
+    xhr.send();
+  }
+
+  function buildList(priv, pub) {
+    var out = [], seen = {};
+    function add(arr, isPub) {
+      if (!Array.isArray(arr)) return;
+      for (var i = 0; i < arr.length; i++) {
+        var it = arr[i]; if (!it || !it.file) continue;
+        var key = (it.file || it.name).toLowerCase();
+        if (seen[key]) continue;
+        seen[key] = 1;
+        out.push({ file: it.file, name: it.name || it.file, slug: it.slug || "", pub: !!isPub });
+      }
+    }
+    add(priv, false);
+    add(pub, true);
+    out.sort(function(a, b){ return a.name.localeCompare(b.name, "pt", { sensitivity: "base" }); });
+    return out;
+  }
+
+  loadJson("roms.json", function(e1, priv) {
+    loadJson("roms_pub.json", function(e2, pub) {
+      list = buildList(priv || [], pub || []);
+      idx = 0;
+      try { var sv = parseInt(sessionStorage.getItem(IDX_KEY), 10); if (!isNaN(sv) && sv >= 0 && sv < list.length) idx = sv; } catch(e) {}
+      focusZone = "list";
+      renderList();
+    });
+  });
+})();
+</script>
+</body>
+</html>
