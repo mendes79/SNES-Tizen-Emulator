@@ -25,9 +25,12 @@ free and non-commercial.
   available at the links above. See `roms_pub/CREDITS.md`.
 
 ## Artwork
-- The controller diagram (`img/joy_snes.png`), its highlight overlays
-  (`img/overlays/`), the app icon and the selection wallpaper are authored for
-  this project.
+- Controller photo (`img/joy_photo.jpg`): photo by Ravi Palwe on Unsplash
+  (https://unsplash.com/photos/_Vrw58wU4aI), used under the Unsplash License
+  (free for commercial and non-commercial use, attribution not required;
+  credited here regardless).
+- The highlight overlays (`img/overlays/`), the app icon and the selection
+  wallpaper are authored for this project.
 
 ## Commercial ROMs
 - Commercial game ROMs are NOT included in this repository. The private `roms/`

@@ -71,18 +71,18 @@
 
   /* ===== Tela de Configuracao de Joystick ===== */
   #joycfg{position:fixed;top:0;right:0;bottom:0;left:0;width:100vw;height:100vh;z-index:40;
-    display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.92)}
+    display:none;align-items:center;justify-content:center;background:#1e2123}
   #joybox{width:96vw;max-width:1320px;text-align:center}
   #joytitle{color:#f3ead9;font-size:3.4vh;font-weight:700;margin:0 0 2.8vh;letter-spacing:.5px}
   #joywrap{display:flex;align-items:center;justify-content:center;gap:4.5vw}
-  #joydiagram{position:relative;display:inline-block;width:48vw;max-width:660px;flex:0 0 auto}
+  #joydiagram{position:relative;display:inline-block;width:54vw;max-width:740px;flex:0 0 auto}
   #joydiagram img{display:block;width:100%;height:auto}
   .joyov{position:absolute;top:0;left:0;width:100%;display:none;pointer-events:none}
-  #joypanel{width:42vw;max-width:560px;text-align:left}
+  #joypanel{width:40vw;max-width:540px;text-align:left}
   #joytable{display:flex;flex-wrap:wrap}
-  .jrow{width:50%;display:flex;justify-content:space-between;align-items:center;padding:1.05vh 1.1vw;font-size:2.5vh;border-bottom:1px solid rgba(255,255,255,.08)}
+  .jrow{width:50%;display:flex;justify-content:space-between;align-items:center;padding:1.2vh 1.1vw;font-size:2.75vh;border-bottom:1px solid rgba(255,255,255,.1)}
   .jrow.cur{background:rgba(91,214,52,.22);border-radius:5px}
-  .jl{color:#b7c1cf} .jv{color:#9fd98a;font-weight:700;margin-left:.8vw}
+  .jl{color:#ffffff;font-weight:600} .jv{color:#ffd23f;font-weight:700;margin-left:.8vw}
   #joystatus{margin:2.4vh 0 2vh;color:#f0d94a;font-size:2.35vh;min-height:3vh;line-height:1.4}
   #joyactions{display:flex;gap:1.6vw}
   .jbtn{padding:1.4vh 2.8vw;border:2px solid #39414d;border-radius:10px;color:#dfe5ee;font-weight:700;font-size:2.5vh;background:rgba(255,255,255,.05)}
@@ -132,7 +132,7 @@
       <div id="joytitle">Configurar Joystick</div>
       <div id="joywrap">
         <div id="joydiagram">
-          <img id="joybase" src="img/joy_snes.png" alt="">
+          <img id="joybase" src="img/joy_photo.jpg" alt="">
           <img class="joyov" id="ov_up" src="img/overlays/ov_up.png" alt="">
           <img class="joyov" id="ov_down" src="img/overlays/ov_down.png" alt="">
           <img class="joyov" id="ov_left" src="img/overlays/ov_left.png" alt="">

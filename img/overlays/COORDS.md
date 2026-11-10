@@ -1,10 +1,10 @@
-# Mascaras dos botoes - joy_snes.jpg (854 x 480). Esquema final (preenchido verde).
+# Mascaras dos botoes - base: img/joy_photo.jpg (foto real)
+# Coordenadas medidas na foto original 1920x1280; mascaras geradas a 1280x853 (escala 2/3).
 
-Face (circulos r=40): X(661,214) Y(592,273) A(737,271) B(663,335)
-Direcionais (circulos r=30): Up(189,217) Down(189,327) Left(139,272) Right(239,272)
-Select/Start (quadrados com o botao na diagonal, meio-lado 22): SELECT(351,296) START(444,297)
-L/R (retangulos finos): L(133,89,287,108) R(568,90,735,108)
+Face (circulos r=58 @1920): X(1344,563) Y(1210,653) A(1496,663) B(1352,750)
+Direcionais (circulos r=44 @1920): Up(595,592) Down(595,730) Left(495,657) Right(677,657)
+Select/Start (pilulas inclinadas ~40 CCW, L~112 T~44 @1920): SELECT(857,694) START(995,694)
+L/R (retangulos no topo, onde estariam - nao aparecem na foto top-down):
+  L(455,410,660,452) R(1270,410,1475,452)
 
-Mapeamento 8BitDo -> SNES (standard mapping):
-  A=botao leste(b1)  B=botao sul(b0)  X=botao norte(b3)  Y=botao oeste(b2)
-  L=b4  R=b5  Select=b8  Start=b9  Guide/Coracao=b16
+Mascaras VERMELHAS (clique). Mapeamento 8BitDo->SNES: A=b1 B=b0 X=b3 Y=b2 L=b4 R=b5 Select=b8 Start=b9 Guide=b16

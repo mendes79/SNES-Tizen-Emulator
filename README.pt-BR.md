@@ -74,6 +74,7 @@ planejado.
 
 - Nucleo snes9x2002: autores do Snes9x e equipe libretro.
 - 240p Test Suite: Artemio Urbina e colaboradores.
+- Foto do controle: Ravi Palwe no Unsplash (Unsplash License).
 - Harness de referencia do GameBoy e o projeto lilauncher, no qual este emulador
   se integra.
 

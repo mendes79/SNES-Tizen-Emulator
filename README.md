@@ -34,6 +34,7 @@ Portuguese version: see [README.pt-BR.md](README.pt-BR.md).
 ## Included free ROM
 
 - 240p Test Suite (SNES) by Artemio Urbina, GNU GPL v2. A video test suite that
+- Controller photo: Ravi Palwe on Unsplash (Unsplash License).
   also works as a free test ROM for the emulator. See `roms_pub/CREDITS.md`.
 
 ## Repository layout
