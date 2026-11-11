@@ -34,7 +34,6 @@ Portuguese version: see [README.pt-BR.md](README.pt-BR.md).
 ## Included free ROM
 
 - 240p Test Suite (SNES) by Artemio Urbina, GNU GPL v2. A video test suite that
-- Controller photo: Ravi Palwe on Unsplash (Unsplash License).
   also works as a free test ROM for the emulator. See `roms_pub/CREDITS.md`.
 
 ## Repository layout
@@ -48,20 +47,26 @@ Portuguese version: see [README.pt-BR.md](README.pt-BR.md).
 - `roms/`, `roms.json` : private commercial ROMs and catalog (git-ignored, not
   published).
 
-## Build and install (overview)
+## Installation
 
-Tooling is Tizen Studio on Windows (sdb.exe and the tizen CLI) with a Samsung
-signing profile. The short path is:
+### 1. Enable Developer Mode on your TV
 
-1. Enable Developer Mode on the TV and note its IP.
-2. Build and sign the `.wgt` with your Samsung certificate profile.
-3. Install over the network with sdb/tizen CLI and launch.
+1. From the Apps screen, press `1 2 3 4 5` on the remote.
+2. Toggle Developer Mode = ON.
+3. Enter your PC's LAN IP in Host PC IP.
+4. Reboot the TV.
 
-Important about distribution: Samsung TV app signing uses a distributor
-certificate bound to the specific TV's DUID. A `.wgt` signed for one TV will not
-install on another person's TV. Each user must create a certificate with their
-own TV's DUID (Samsung account plus the Samsung Certificate Extension) and sign
-the package themselves. A detailed, illustrated installation guide is planned.
+### 2. Build, sign and install the app
+
+Samsung signs every TV app with a certificate bound to that specific TV's DUID,
+so a prebuilt `.wgt` cannot be shared between TVs. Using Tizen Studio on Windows,
+create a Samsung certificate with your TV's DUID, then build, sign and install
+the app over the network and launch it. This is a one-time setup; later installs
+are quick.
+
+Need a detailed step by step with screenshots? See the installation guide:
+[docs/INSTALL.md](docs/INSTALL.md) (Portuguese:
+[docs/INSTALACAO.md](docs/INSTALACAO.md)).
 
 ## License
 
@@ -70,10 +75,26 @@ the package themselves. A detailed, illustrated installation guide is planned.
   snes9x2002 core under the Snes9x non-commercial license, and the 240p Test
   Suite under GPL v2. This project is free and non-commercial.
 
+## Legal Disclaimer
+
+This project is an independent, unofficial emulator developed for educational
+purposes only.
+
+- This repository does not include any copyrighted ROMs or proprietary assets.
+  The only bundled ROM is the 240p Test Suite, freely distributable under
+  GPL v2.
+- Users must provide their own legally obtained SNES ROMs to play other games.
+  Private commercial ROMs stay local and are never published.
+- This project is not affiliated with, endorsed by or associated with Nintendo
+  or the Super Nintendo Entertainment System.
+- All trademarks and registered trademarks are the property of their respective
+  owners.
+
 ## Credits
 
 - snes9x2002 core: the Snes9x authors and the libretro team.
 - 240p Test Suite: Artemio Urbina and contributors.
+- Controller photo: Ravi Palwe on Unsplash (Unsplash License).
 - GameBoy reference harness and the lilauncher project, which this emulator
   plugs into.
 

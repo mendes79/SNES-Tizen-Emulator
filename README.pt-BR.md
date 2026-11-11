@@ -47,21 +47,26 @@ Versao em ingles (principal): [README.md](README.md).
 - `roms/`, `roms.json` : ROMs comerciais privadas e catalogo (git-ignored, nao
   publicados).
 
-## Build e instalacao (visao geral)
+## Instalacao
 
-A ferramenta e o Tizen Studio no Windows (sdb.exe e a CLI tizen) com um perfil de
-assinatura Samsung. O caminho curto:
+### 1. Ative o Modo Desenvolvedor na TV
 
-1. Ative o Modo Desenvolvedor na TV e anote o IP.
-2. Gere e assine o `.wgt` com seu perfil de certificado Samsung.
-3. Instale pela rede com sdb/CLI tizen e abra.
+1. Na tela de Apps, digite `1 2 3 4 5` no controle.
+2. Ligue o Modo Desenvolvedor (ON).
+3. Informe o IP de rede local do seu PC em Host PC IP.
+4. Reinicie a TV.
 
-Importante sobre distribuicao: a assinatura de apps de TV Samsung usa um
-certificado de distribuidor amarrado ao DUID da TV especifica. Um `.wgt` assinado
-para uma TV nao instala na TV de outra pessoa. Cada usuario precisa criar um
-certificado com o DUID da propria TV (conta Samsung mais a Samsung Certificate
-Extension) e assinar o pacote. Um guia de instalacao detalhado e ilustrado esta
-planejado.
+### 2. Gere, assine e instale o app
+
+A Samsung assina todo app de TV com um certificado amarrado ao DUID daquela TV
+especifica, entao um `.wgt` pronto nao pode ser compartilhado entre TVs. Com o
+Tizen Studio no Windows, crie um certificado Samsung com o DUID da sua TV, gere,
+assine e instale o app pela rede e abra. E uma configuracao unica; as proximas
+instalacoes sao rapidas.
+
+Precisa do passo a passo detalhado com imagens? Veja o guia de instalacao:
+[docs/INSTALACAO.md](docs/INSTALACAO.md) (ingles:
+[docs/INSTALL.md](docs/INSTALL.md)).
 
 ## Licenca
 
@@ -69,6 +74,22 @@ planejado.
 - Componentes de terceiros mantem suas licencas (ver THIRD-PARTY.md): o nucleo
   snes9x2002 sob a licenca Snes9x (nao-comercial) e o 240p Test Suite sob GPL v2.
   Este projeto e gratuito e nao-comercial.
+
+## Aviso legal
+
+Este projeto e um emulador independente e nao oficial, desenvolvido apenas para
+fins educacionais.
+
+- Este repositorio nao inclui nenhuma ROM protegida por direitos autorais nem
+  recursos proprietarios. A unica ROM inclusa e a 240p Test Suite, de livre
+  distribuicao sob GPL v2.
+- O usuario deve fornecer as proprias ROMs de SNES obtidas de forma legal para
+  jogar outros jogos. ROMs comerciais privadas ficam locais e nunca sao
+  publicadas.
+- Este projeto nao e afiliado, endossado ou associado a Nintendo nem ao Super
+  Nintendo Entertainment System.
+- Todas as marcas e marcas registradas sao propriedade de seus respectivos
+  donos.
 
 ## Creditos
 
