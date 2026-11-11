@@ -101,4 +101,5 @@ fins educacionais.
 
 ## Relacionado
 
-Este emulador faz parte de um conjunto de aplicativos para Smart TV Samsung com Tizen, todos integrados ao lilauncher. O lilauncher e a tela inicial da TV, de onde este emulador e aberto, e esta em https://github.com/mendes79/lilauncher. O Videoke TV e uma estacao de karaoke com controle de fila pelo celular via QR Code, disponivel em https://github.com/mendes79/videoke-tv.
+- lilauncher (tela inicial propria da TV): https://github.com/mendes79/lilauncher
+- Videoke TV (estacao de karaoke com controle de fila pelo celular via QR Code): https://github.com/mendes79/videoke-tv
