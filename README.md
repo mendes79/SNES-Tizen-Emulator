@@ -101,3 +101,4 @@ purposes only.
 ## Related
 
 - lilauncher (custom TV home screen): https://github.com/mendes79/lilauncher
+- Videokê TV (karaoke station for the TV, real-time mobile queue via QR Code, launched from lilauncher): https://github.com/mendes79/videoke-tv
