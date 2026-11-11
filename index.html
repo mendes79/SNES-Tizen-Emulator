@@ -18,31 +18,35 @@
   #tvscreen{position:fixed;left:30%;top:9%;width:40%;height:46%;
     display:flex;flex-direction:column;align-items:stretch;justify-content:center;overflow:hidden}
 
-  #gamelist{display:flex;flex-direction:column;align-items:stretch;justify-content:center;width:100%;height:100%}
+  #gamelist{display:flex;flex-direction:column;align-items:stretch;justify-content:center;width:100%;height:100%;padding:4.2vh 0}
   .grow{font-family:"Consolas","Courier New",monospace;color:#161616;font-weight:700;
-    text-align:center;line-height:1.32;font-size:3.3vh;letter-spacing:.3px;
+    text-align:center;line-height:1.22;font-size:3.3vh;letter-spacing:.3px;
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding:0 2%}
   .grow.sel{background:#5bd634;color:#0a0a0a;border-radius:4px}
 
-  .scrollind{position:absolute;left:0;right:0;text-align:center;color:#5bd634;font-size:3.0vh;font-weight:700;pointer-events:none;text-shadow:0 1px 3px rgba(0,0,0,.35)}
-  #indUp{top:1%}
-  #indDown{bottom:1%}
+  .scrollind{position:absolute;left:0;right:0;text-align:center;color:#5bd634;font-size:3.5vh;font-weight:700;pointer-events:none;text-shadow:0 1px 3px rgba(0,0,0,.35)}
+  #indUp{top:0.6vh}
+  #indDown{bottom:0.6vh}
   .scrollind.off{display:none}
 
   /* Engrenagem no canto superior direito do WALLPAPER */
-  #gear{position:fixed;top:2.6vh;right:2.6vw;width:6.2vh;height:6.2vh;z-index:12;
-    display:flex;align-items:center;justify-content:center;border-radius:50%;
+  #topbtns{position:fixed;top:2.4vh;right:2.6vw;z-index:12;display:flex;align-items:center;gap:1.6vh}
+  #gear,#powerbtn{width:7.1vh;height:7.1vh;display:flex;align-items:center;justify-content:center;border-radius:50%;
     background:rgba(0,0,0,.35);transition:transform .12s ease, background .12s ease, box-shadow .12s ease}
-  #gear svg{width:70%;height:70%;display:block}
+  #gear svg,#powerbtn svg{width:70%;height:70%;display:block}
   #gear .gpath{fill:#e9e9e9;transition:fill .12s ease}
-  #gear.focus{transform:scale(1.22);background:rgba(10,10,10,.85);
+  #gear.focus{transform:scale(1.18);background:rgba(10,10,10,.85);
     box-shadow:0 0 0 3px #5bd634, 0 0 18px 4px rgba(91,214,52,.8)}
   #gear.focus .gpath{fill:#5bd634}
+  #powerbtn .ppath{fill:#e86b63;transition:fill .12s ease}
+  #powerbtn.focus{transform:scale(1.18);background:rgba(10,10,10,.85);
+    box-shadow:0 0 0 3px #e0564e, 0 0 18px 4px rgba(224,86,78,.85)}
+  #powerbtn.focus .ppath{fill:#ff6a60}
 
   /* Dica discreta sobre a area de madeira (abaixo da TV) */
   /* Legenda em forma de folha de caderno pautada sobre a mesa (esquerda do console) */
-  #hint{position:fixed;left:3vw;bottom:2.5vh;z-index:11;width:29vw;max-width:440px;
-    padding:1.6vh 1.6vw 1.7vh 3.8vw;box-sizing:border-box;overflow:hidden;
+  #hint{position:fixed;left:3vw;bottom:2.5vh;z-index:11;width:23vw;max-width:360px;
+    padding:3.35vh 1.3vw 0.5vh 3.4vw;box-sizing:border-box;overflow:hidden;
     color:#223040;font-size:2.45vh;line-height:3.35vh;font-weight:600;
     font-family:"Comic Sans MS","Marker Felt","Segoe Print","Trebuchet MS",sans-serif;
     background-color:#fcfbf2;
@@ -50,7 +54,7 @@
     border-radius:3px;
     box-shadow:0 13px 26px rgba(0,0,0,.5), 0 2px 5px rgba(0,0,0,.35), inset 0 0 0 1px rgba(0,0,0,.05);
     transform:rotate(-3.5deg)}
-  #hint::before{content:"";position:absolute;top:0;bottom:0;left:2.6vw;width:2px;background:rgba(206,86,86,.7)}
+  #hint::before{content:"";position:absolute;top:0;bottom:0;left:2.3vw;width:2px;background:rgba(206,86,86,.7)}
   #hint b{color:#1a4fa0}
 
   /* ===== Menu de Configuracoes ===== */
@@ -110,25 +114,29 @@
       <div id="gamelist"></div>
       <div id="indDown" class="scrollind off">&#9660;</div>
     </div>
-    <div id="gear" title="Configuracoes">
+    <div id="topbtns">
+      <div id="gear" title="Configuracoes">
       <svg viewBox="0 0 24 24" aria-hidden="true"><path class="gpath" d="M19.14 12.94a7.49 7.49 0 0 0 .05-.94 7.49 7.49 0 0 0-.05-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.61-.22l-2.39.96a7.3 7.3 0 0 0-1.62-.94l-.36-2.54a.5.5 0 0 0-.5-.42h-3.84a.5.5 0 0 0-.5.42l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 0 0-.61.22L2.26 8.2a.5.5 0 0 0 .12.64l2.03 1.58c-.03.31-.05.62-.05.94 0 .32.02.63.05.94L2.38 15.4a.5.5 0 0 0-.12.64l1.92 3.32c.14.24.42.33.61.22l2.39-.96c.49.38 1.03.7 1.62.94l.36 2.54c.05.24.26.42.5.42h3.84c.24 0 .45-.18.5-.42l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.24.09.5 0 .61-.22l1.92-3.32a.5.5 0 0 0-.12-.64l-2.03-1.58zM12 15.6A3.6 3.6 0 1 1 12 8.4a3.6 3.6 0 0 1 0 7.2z"/></svg>
+      </div>
+      <div id="powerbtn" title="Sair">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path class="ppath" d="M13 3h-2v10h2V3zm4.83 2.17l-1.42 1.42C16.07 7.9 17 9.83 17 12c0 2.76-2.24 5-5 5s-5-2.24-5-5c0-2.17.93-4.1 2.58-5.42L6.17 5.17C4.23 6.82 3 9.26 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.18-3.17-6.83z"/></svg>
+      </div>
     </div>
     <div id="hint">
       <b>&#9650; &#9660;</b> navegar<br>
-      <b>&#9658;</b> engrenagem<br>
-      <b>OK / A</b> abre<br>
-      <b>SELECT</b> configuracoes<br>
-      <b>Voltar / SELECT + START</b> sai
+      <b>&#9658;</b> engrenagem / sair<br>
+      <b>OK / A</b> seleciona
     </div>
   </div>
 
   <div id="settings">
     <div id="setbox">
-      <div id="settitle">Configuracoes</div>
-      <div class="setrow" data-k="joy"><span class="lab">Configurar Joystick</span><span class="val">abrir &#8250;</span></div>
-      <div class="setrow" data-k="sound"><span class="lab">Som</span><span class="val" id="valSound">LIGADO</span></div>
-      <div class="setrow" data-k="speed"><span class="lab">Velocidade</span><span class="val" id="valSpeed">100%</span></div>
-      <div id="sethint"><b>&#9650; &#9660;</b> seleciona &middot; <b>&#8249; &#8250; / A</b> altera &middot; <b>Voltar / B</b> volta</div>
+      <div id="settitle">CONFIGURAÇÕES</div>
+      <div class="setrow" data-k="joy"><span class="lab">CONFIGURAR JOYSTICK</span><span class="val">ABRIR</span></div>
+      <div class="setrow" data-k="sound"><span class="lab">SOM</span><span class="val" id="valSound">LIGADO</span></div>
+      <div class="setrow" data-k="speed"><span class="lab">VELOCIDADE</span><span class="val" id="valSpeed">100%</span></div>
+      <div class="setrow" data-k="sair"><span class="lab">SAIR</span><span class="val"></span></div>
+      <div id="sethint"><b>&#9650; &#9660;</b> seleciona &middot; <b>&#8249; &#8250;</b> muda valor &middot; <b>A</b> ativa / abre</div>
     </div>
   </div>
 
@@ -204,6 +212,7 @@
   var listEl = document.getElementById("gamelist");
   var indUp = document.getElementById("indUp"), indDown = document.getElementById("indDown");
   var gearEl = document.getElementById("gear");
+  var powerEl = document.getElementById("powerbtn");
   var valSound = document.getElementById("valSound"), valSpeed = document.getElementById("valSpeed");
   var joycfgEl = document.getElementById("joycfg");
 
@@ -216,8 +225,8 @@
   var selView = "list";        // dentro de carousel: "list" | "settings"
   var focusZone = "list";      // dentro de list: "list" | "gear"
   var setIdx = 1;              // item selecionado em Configuracoes (0=joy,1=sound,2=speed)
-  var SET_ITEMS = ["joy","sound","speed"];
-  var VISROWS = 10;            // linhas visiveis na "tela" da TV
+  var SET_ITEMS = ["joy","sound","speed","sair"];
+  var VISROWS = 9;            // linhas visiveis na "tela" da TV
 
   var activeAdapter = null;
   var availableEngines = Object.keys(window.CoreAdapters || {});
@@ -335,11 +344,15 @@
     indDown.classList.toggle("off", last >= list.length);
   }
 
-  function setFocusGear(on) {
-    focusZone = on ? "gear" : "list";
-    gearEl.classList.toggle("focus", on);
+  function setFocus(zone) {
+    focusZone = zone;
+    gearEl.classList.toggle("focus", zone==="gear");
+    powerEl.classList.toggle("focus", zone==="sair");
     renderList();
   }
+  function setFocusGear(on){ setFocus(on ? "gear" : "list"); }
+  function focusRight(){ setFocus(focusZone==="list" ? "gear" : "sair"); }
+  function focusLeft(){ setFocus(focusZone==="sair" ? "gear" : "list"); }
 
   function moveSel(d) {
     if (!list.length) return;
@@ -462,6 +475,7 @@
     if (k === "sound") settingsAdjust(1);
     else if (k === "speed") settingsAdjust(1);
     else if (k === "joy") openJoyCfg();
+    else if (k === "sair") closeSettings();
   }
 
   // ===== Carregar / iniciar jogo =====
@@ -579,19 +593,18 @@
         else if (k === 37) { settingsAdjust(-1); ev.preventDefault(); }
         else if (k === 39) { settingsAdjust(1); ev.preventDefault(); }
         else if (k === 13 || k === 32 || k === 88) { settingsActivate(); ev.preventDefault(); }
-        else if (k === 10009 || k === 27 || k === 8 || k === 90) { closeSettings(); ev.preventDefault(); }
+        else if (k === 10009 || k === 27 || k === 8) { closeSettings(); ev.preventDefault(); }
         return;
       }
       // selView === "list"
       if (k === 38) { if (focusZone === "list") moveSel(-1); ev.preventDefault(); }
       else if (k === 40) { if (focusZone === "list") moveSel(1); ev.preventDefault(); }
-      else if (k === 39) { setFocusGear(true); ev.preventDefault(); }
-      else if (k === 37) { setFocusGear(false); ev.preventDefault(); }
+      else if (k === 39) { focusRight(); ev.preventDefault(); }
+      else if (k === 37) { focusLeft(); ev.preventDefault(); }
       else if (k === 13 || k === 32 || k === 10252) {
-        if (focusZone === "gear") openSettings(); else launchSelectedGame();
+        if (focusZone === "gear") openSettings(); else if (focusZone === "sair") exitApp(); else launchSelectedGame();
         ev.preventDefault();
       }
-      else if (k === 415 || k === 16) { openSettings(); ev.preventDefault(); } // Select (remoto) -> Configuracoes
       else if (k === 10009 || k === 27 || k === 8) { exitApp(); ev.preventDefault(); }
       return;
     }
@@ -710,7 +723,6 @@
           else if (!up && !down && !left && !right) { navCooldown = 0; }
           if ((btnA) && !prevA) settingsActivate();
           prevA = btnA;
-          if ((btnB) && !prevB) closeSettings();
           prevB = btnB;
           prevSel = btnSelect; prevPadBack = padBack; prevLR = false;
           break;
@@ -720,19 +732,17 @@
           if (focusZone === "list") moveSel(up ? -1 : 1);
           navCooldown = now + 170;
         } else if ((left || right) && now > navCooldown) {
-          setFocusGear(right ? true : false);
+          if (right) focusRight(); else focusLeft();
           navCooldown = now + 220;
         } else if (!up && !down && !left && !right) {
           navCooldown = 0;
         }
         if (btnA || btnStart) resumeAudio();
         if ((btnA || btnStart) && !prevA && !padBack) {
-          if (focusZone === "gear") openSettings(); else launchSelectedGame();
+          if (focusZone === "gear") openSettings(); else if (focusZone === "sair") exitApp(); else launchSelectedGame();
         }
         prevA = (btnA || btnStart);
-        if (btnSelect && !prevSel && !btnStart) openSettings(); // Select -> Configuracoes
         prevSel = btnSelect;
-        if (padBack && !prevPadBack) exitApp();
         prevPadBack = padBack;
         prevB = btnB;
       } else {
