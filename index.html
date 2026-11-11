@@ -84,9 +84,14 @@
   .jrow.cur{background:rgba(91,214,52,.22);border-radius:5px}
   .jl{color:#ffffff;font-weight:600} .jv{color:#ffd23f;font-weight:700;margin-left:.8vw}
   #joystatus{margin:2.4vh 0 2vh;color:#f0d94a;font-size:2.35vh;min-height:3vh;line-height:1.4}
-  #joyactions{display:flex;gap:1.6vw}
-  .jbtn{padding:1.4vh 2.8vw;border:2px solid #39414d;border-radius:10px;color:#dfe5ee;font-weight:700;font-size:2.5vh;background:rgba(255,255,255,.05)}
-  .jbtn.focus{border-color:#5bd634;background:rgba(91,214,52,.22);color:#eafbe4}
+  #joytop{display:flex;justify-content:center;gap:2.2vw;margin:0 0 2.2vh}
+  #joyactions_bot{display:flex;gap:1.6vw;margin-top:.4vh}
+  .jbtn{padding:1.4vh 2.8vw;border:2px solid #39414d;border-radius:10px;color:#dfe5ee;font-weight:700;font-size:2.5vh;background:rgba(255,255,255,.05);transition:box-shadow .1s,border-color .1s}
+  .jbtn.btest{border-color:#2f6fd0;color:#cfe2ff}
+  .jbtn.bconf{border-color:#3fa93a;color:#d6f5cf}
+  .jbtn.bexit{border-color:#b5463f;color:#f3d2cf}
+  .jbtn.dim{opacity:.38}
+  .jbtn.focus{border-color:#ffd23f;color:#fff;background:rgba(255,210,63,.14);box-shadow:0 0 0 3px rgba(255,255,255,.12),0 0 16px 3px rgba(255,210,63,.5)}
   #joyhint{margin-top:2vh;color:#959fad;font-size:2.0vh;line-height:1.5}
   #joyhint b{color:#5bd634}
 
@@ -130,6 +135,11 @@
   <div id="joycfg">
     <div id="joybox">
       <div id="joytitle">Configurar Joystick</div>
+      <div id="joytop">
+        <div class="jbtn btest" id="btn_testar">TESTAR</div>
+        <div class="jbtn bconf" id="btn_configurar">CONFIGURAR</div>
+        <div class="jbtn bexit" id="btn_sair">SAIR</div>
+      </div>
       <div id="joywrap">
         <div id="joydiagram">
           <img id="joybase" src="img/joy_photo.jpg" alt="">
@@ -162,12 +172,11 @@
             <div class="jrow" id="row_select"><span class="jl">Select</span><span class="jv" id="map_select"></span></div>
           </div>
           <div id="joystatus"></div>
-          <div id="joyactions">
-            <div class="jbtn" id="btn_iniciar">INICIAR</div>
+          <div id="joyactions_bot">
             <div class="jbtn" id="btn_ok">OK</div>
             <div class="jbtn" id="btn_reset">RESET</div>
           </div>
-          <div id="joyhint"><b>&#8249; &#8250;</b> move &middot; <b>A</b> ativa &middot; no INICIAR, <b>Select+Start</b> pula &middot; <b>Voltar</b> fecha</div>
+          <div id="joyhint"><b>&#8249; &#8250;</b> move &middot; <b>A</b> ativa &middot; no CONFIGURAR/TESTE: <b>Select+Start</b> &middot; <b>Voltar</b> fecha</div>
         </div>
       </div>
     </div>
@@ -391,11 +400,12 @@
   var CMD_LIST = ["up","down","left","right","b","a","y","x","l","r","select","start"];
   var CMD_LABEL = {up:"Cima",down:"Baixo",left:"Esquerda",right:"Direita",b:"B",a:"A",y:"Y",x:"X",l:"L",r:"R",select:"Select",start:"Start"};
   var WIZ_ORDER = ["up","left","down","right","b","a","y","x","l","r","start","select"];
-  var JOY_ACTIONS = ["iniciar","ok","reset"];
   var customMap = null;
   try { var _cm = localStorage.getItem("snescore.map"); if (_cm) customMap = JSON.parse(_cm); } catch(e){}
   var keyHeld = {};
-  var wizActive=false, wizIdx=0, pendingMap=null, wizWaitRelease=false, wizKeyLock=false, joyFocusIdx=0;
+  var JOY_TOP=["testar","configurar","sair"], JOY_POST=["ok","reset"];
+  var joyState="idle", joyFocus="testar";
+  var wizIdx=0, pendingMap=null, wizWaitRelease=false, wizKeyLock=false;
 
   function evalDesc(desc, pad, b){
     if(!desc) return false;
@@ -412,26 +422,40 @@
     if(desc.t==="key") return "Tecla "+desc.k;
     return "?";
   }
+  function focusSet(){ return joyState==="post" ? JOY_POST : JOY_TOP; }
   function renderJoyTable(){
     for (var i=0;i<CMD_LIST.length;i++){
       var c=CMD_LIST[i], el=document.getElementById("map_"+c), row=document.getElementById("row_"+c);
       if(el){ var txt; if(pendingMap){ txt=(c in pendingMap)?descLabel(pendingMap[c]):"—"; } else if(customMap){ txt=descLabel(customMap[c]); } else { txt="padrao"; } el.textContent=txt; }
-      if(row) row.classList.toggle("cur", wizActive && WIZ_ORDER[wizIdx]===c);
+      if(row) row.classList.toggle("cur", joyState==="wizard" && WIZ_ORDER[wizIdx]===c);
     }
-    for (var a=0;a<JOY_ACTIONS.length;a++){ var be=document.getElementById("btn_"+JOY_ACTIONS[a]); if(be) be.classList.toggle("focus", !wizActive && joyFocusIdx===a); }
+    ["testar","configurar","sair","ok","reset"].forEach(function(id){
+      var be=document.getElementById("btn_"+id); if(!be) return;
+      be.classList.toggle("focus", (joyState==="idle"||joyState==="post") && joyFocus===id);
+      if(id==="ok"||id==="reset") be.classList.toggle("dim", joyState!=="post");
+    });
     var st=document.getElementById("joystatus");
-    if(st){ st.textContent = wizActive ? ("Pressione no controle para: "+CMD_LABEL[WIZ_ORDER[wizIdx]]+"   (Select+Start pula)") : (pendingMap ? "Config capturada. OK salva, RESET volta ao padrao." : "INICIAR configura em sequencia. OK salva, RESET volta ao padrao."); }
+    if(st){ st.textContent = joyState==="test" ? "Modo TESTE: pressione os botoes do controle. SELECT+START sai do teste."
+      : joyState==="wizard" ? ("Pressione no controle para: "+CMD_LABEL[WIZ_ORDER[wizIdx]]+"   (Select+Start pula)")
+      : joyState==="post" ? "Config capturada. OK salva, RESET volta ao padrao."
+      : "TESTAR mostra os botoes pressionados. CONFIGURAR mapeia em sequencia. SAIR volta aos jogos."; }
   }
-  function startWizard(){ pendingMap={}; wizActive=true; wizIdx=0; wizWaitRelease=true; wizKeyLock=true; renderJoyTable(); }
-  function wizAssign(desc){ if(!wizActive) return; pendingMap[WIZ_ORDER[wizIdx]]=desc; wizIdx++; if(wizIdx>=WIZ_ORDER.length){ wizActive=false; joyFocusIdx=1; clearOverlays(); } renderJoyTable(); }
-  function wizCancel(){ wizActive=false; clearOverlays(); renderJoyTable(); }
-  function commitMap(){ if(pendingMap){ customMap=pendingMap; try{localStorage.setItem("snescore.map",JSON.stringify(customMap));}catch(e){} pendingMap=null; renderJoyTable(); } }
-  function resetMap(){ customMap=null; pendingMap=null; wizActive=false; try{localStorage.removeItem("snescore.map");}catch(e){} clearOverlays(); renderJoyTable(); }
-  function joyFocus(d){ joyFocusIdx=(joyFocusIdx+d+JOY_ACTIONS.length)%JOY_ACTIONS.length; renderJoyTable(); }
-  function joyActivate(){ var a=JOY_ACTIONS[joyFocusIdx]; if(a==="iniciar") startWizard(); else if(a==="ok") commitMap(); else if(a==="reset") resetMap(); }
+  function startTest(){ joyState="test"; clearOverlays(); renderJoyTable(); }
+  function exitTest(){ joyState="idle"; joyFocus="testar"; clearOverlays(); renderJoyTable(); }
+  function startWizard(){ pendingMap={}; joyState="wizard"; wizIdx=0; wizWaitRelease=true; wizKeyLock=true; clearOverlays(); renderJoyTable(); }
+  function wizAssign(desc){ if(joyState!=="wizard") return; pendingMap[WIZ_ORDER[wizIdx]]=desc; wizIdx++; if(wizIdx>=WIZ_ORDER.length){ joyState="post"; joyFocus="ok"; clearOverlays(); } renderJoyTable(); }
+  function wizCancel(){ joyState="idle"; joyFocus="configurar"; clearOverlays(); renderJoyTable(); }
+  function commitMap(){ if(pendingMap){ customMap=pendingMap; try{localStorage.setItem("snescore.map",JSON.stringify(customMap));}catch(e){} pendingMap=null; } }
+  function resetMap(){ customMap=null; pendingMap=null; try{localStorage.removeItem("snescore.map");}catch(e){} }
+  function afterPost(){ joyState="idle"; joyFocus="sair"; clearOverlays(); renderJoyTable(); }
+  function joyMove(d){ var set=focusSet(); var i=set.indexOf(joyFocus); if(i<0)i=0; joyFocus=set[(i+d+set.length)%set.length]; renderJoyTable(); }
+  function joyActivate(){
+    if(joyState==="idle"){ if(joyFocus==="testar") startTest(); else if(joyFocus==="configurar") startWizard(); else if(joyFocus==="sair") closeJoyCfg(); }
+    else if(joyState==="post"){ if(joyFocus==="ok"){ commitMap(); afterPost(); } else if(joyFocus==="reset"){ resetMap(); afterPost(); } }
+  }
 
-  function openJoyCfg(){ selView="joycfg"; wizActive=false; pendingMap=null; joyFocusIdx=0; clearOverlays(); joycfgEl.style.display="flex"; renderJoyTable(); }
-  function closeJoyCfg(){ selView="settings"; wizActive=false; clearOverlays(); joycfgEl.style.display="none"; }
+  function openJoyCfg(){ selView="joycfg"; joyState="idle"; joyFocus="testar"; pendingMap=null; clearOverlays(); joycfgEl.style.display="flex"; renderJoyTable(); }
+  function closeJoyCfg(){ selView="settings"; joyState="idle"; clearOverlays(); joycfgEl.style.display="none"; }
 
   function settingsActivate() {
     var k = SET_ITEMS[setIdx];
@@ -531,14 +555,21 @@
 
     if (mode === "carousel") {
       if (selView === "joycfg") {
-        if (wizActive) {
+        if (joyState === "wizard") {
           if (k === 10009 || k === 27 || k === 8) { wizCancel(); ev.preventDefault(); return; }
           if (!wizKeyLock) { wizKeyLock = true; wizAssign({t:"key",k:k}); }
           ev.preventDefault(); return;
         }
+        if (joyState === "test") {
+          if (k === 10009 || k === 27 || k === 8) { exitTest(); ev.preventDefault(); return; }
+          if (k === 38) setOv("ov_up", true); else if (k === 40) setOv("ov_down", true);
+          else if (k === 37) setOv("ov_left", true); else if (k === 39) setOv("ov_right", true);
+          else if (k === 13 || k === 10252) setOv("ov_start", true);
+          ev.preventDefault(); return;
+        }
         if (k === 10009 || k === 27 || k === 8) { closeJoyCfg(); ev.preventDefault(); return; }
-        if (k === 37) { joyFocus(-1); ev.preventDefault(); }
-        else if (k === 39) { joyFocus(1); ev.preventDefault(); }
+        if (k === 37) { joyMove(-1); ev.preventDefault(); }
+        else if (k === 39) { joyMove(1); ev.preventDefault(); }
         else if (k === 13 || k === 32) { joyActivate(); ev.preventDefault(); }
         return;
       }
@@ -583,7 +614,15 @@
   window.addEventListener("keyup", function(ev) {
     var k = ev.keyCode;
     keyHeld[k] = false;
-    if (mode === "carousel" && selView === "joycfg") { wizKeyLock = false; return; }
+    if (mode === "carousel" && selView === "joycfg") {
+      wizKeyLock = false;
+      if (joyState === "test") {
+        if (k === 38) setOv("ov_up", false); else if (k === 40) setOv("ov_down", false);
+        else if (k === 37) setOv("ov_left", false); else if (k === 39) setOv("ov_right", false);
+        else if (k === 13 || k === 10252) setOv("ov_start", false);
+      }
+      return;
+    }
     if (mode !== "game") return;
     if (k === 38) keyInput.up = false;
     else if (k === 40) keyInput.down = false;
@@ -600,7 +639,7 @@
 
   // Clique do mouse na engrenagem (opcional)
   gearEl.addEventListener("click", function(){ if (mode === "carousel") { if (selView === "settings") closeSettings(); else openSettings(); } });
-  JOY_ACTIONS.forEach(function(a, ai){ var e=document.getElementById("btn_"+a); if(e) e.addEventListener("click", function(){ if(!wizActive){ joyFocusIdx=ai; joyActivate(); } }); });
+  ["testar","configurar","sair","ok","reset"].forEach(function(id){ var e=document.getElementById("btn_"+id); if(e) e.addEventListener("click", function(){ if(joyState==="wizard"||joyState==="test") return; if(focusSet().indexOf(id)>=0){ joyFocus=id; joyActivate(); } }); });
 
   // ===== Gamepad 8BitDo =====
   var navCooldown = 0;
@@ -634,7 +673,16 @@
 
       if (mode === "carousel") {
         if (selView === "joycfg") {
-          if (wizActive) {
+          if (joyState === "test") {
+            var l1t=!!(b[4]&&b[4].pressed), r1t=!!(b[5]&&b[5].pressed);
+            setOv("ov_up",up); setOv("ov_down",down); setOv("ov_left",left); setOv("ov_right",right);
+            setOv("ov_a",btnB); setOv("ov_b",btnA); setOv("ov_x",btnY); setOv("ov_y",btnX);
+            setOv("ov_l",l1t); setOv("ov_r",r1t); setOv("ov_select",btnSelect); setOv("ov_start",btnStart);
+            if (backCombo && !prevPadBack) exitTest();
+            prevPadBack = backCombo; prevA=btnA; prevB=btnB; prevSel=btnSelect;
+            break;
+          }
+          if (joyState === "wizard") {
             var blinkOn = (Math.floor(now/400)%2)===0;
             clearOverlays(); setOv("ov_"+WIZ_ORDER[wizIdx], blinkOn);
             var skip = btnSelect && btnStart;
@@ -648,7 +696,7 @@
             prevPadBack = btnGuide; prevA=btnA; prevB=btnB; prevSel=btnSelect;
             break;
           }
-          if ((left||right) && now > navCooldown) { joyFocus(right?1:-1); navCooldown = now+220; }
+          if ((left||right) && now > navCooldown) { joyMove(right?1:-1); navCooldown = now+220; }
           else if (!left && !right) { navCooldown = 0; }
           if (btnA && !prevA) joyActivate();
           prevA = btnA;
