@@ -4,16 +4,16 @@ The original application code of this project is under the MIT License (see LICE
 The components below are third-party and keep their own licenses. This project is
 free and non-commercial.
 
-## snes9x2002 (emulation core)
-- Files: `js/snes9x2002.wasm`, `js/snes9x2002.js` (compiled with Emscripten).
-- Origin: https://github.com/libretro/snes9x2002 (derived from Snes9x).
+## snes9x2005 (emulation core)
+- Files: `js/snes9x2005.wasm`, `js/snes9x2005.js` (compiled with Emscripten).
+- Origin: https://github.com/libretro/snes9x2005 (derived from Snes9x 1.43, ex-CatSFC).
 - License: the Snes9x license. Snes9x and its derivatives are free for
   non-commercial use; they may be redistributed provided the license and
   credits are kept, and may not be sold or used commercially.
 - This project does not sell the core nor the application. The core is bundled
   only to run the emulator on the target TV.
 - Build reproducibility: see `core/` (build.sh and VERSION.md), Emscripten
-  emcc 3.1.56, single-thread scalar, `-mno-simd128`.
+  emcc 3.1.56, single-thread scalar, `-mno-simd128`, `-DLOAD_FROM_MEMORY`, pinned commit a79dfe9.
 
 ## 240p Test Suite (bundled free ROM)
 - File: `roms_pub/240pSuite.sfc`.

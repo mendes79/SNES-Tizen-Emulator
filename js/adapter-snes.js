@@ -8,7 +8,7 @@
 
   var IDB_NAME = "AtariWasmCacheDB";
   var IDB_STORE = "modules";
-  var IDB_KEY = "snes9x2002_v1_3.1.56";
+  var IDB_KEY = "snes9x2005_v1_3.1.56";
 
   var wasmModulePromise = null;
   var instancePromise = null;
@@ -312,7 +312,7 @@
 
   function ensureStellaLoaded(wasmUrl) {
     if (instancePromise) return instancePromise;
-    var url = wasmUrl || "js/snes9x2002.wasm";
+    var url = wasmUrl || "js/snes9x2005.wasm";
 
     instancePromise = Promise.all([
       loadCachedModule(),
@@ -373,7 +373,7 @@
   }
 
   var StellaAdapter = {
-    name: "Snes9x2002 (WASM)",
+    name: "Snes9x2005 (WASM)",
 
     init: function (romBytes, romName, wasmUrl) {
       return ensureStellaLoaded(wasmUrl).then(function () {
@@ -528,6 +528,14 @@
 
     getSpeedScale: function () {
       return speedScale;
+    },
+
+    setHostSampleRate: function (hz) {
+      if (hz > 8000 && hz < 192000) { HOST_SAMPLE_RATE = hz; }
+    },
+
+    getHostSampleRate: function () {
+      return HOST_SAMPLE_RATE;
     },
 
     getVideoStandardName: function () {

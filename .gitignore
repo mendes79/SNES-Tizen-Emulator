@@ -32,3 +32,7 @@ img/auxiliares/
 INVENTARIO-UNIFICACAO.md
 ACEITACAO-POR-JOGO.md
 img/joy_snes.png
+
+# Artefatos de build do nucleo (fonte clonada e objetos)
+core/snes9x2005/
+core/build/

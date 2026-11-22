@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' data: blob: filesystem:;">
-<title>Super Nintendo (snes9x2002 + HonestHUD) - lilauncher</title>
+<title>Super Nintendo (snes9x2005 + HonestHUD) - lilauncher</title>
 <style>
   *{box-sizing:border-box}
   html,body{margin:0;padding:0;width:100vw;height:100vh;overflow:hidden;background:#000;
@@ -198,7 +198,7 @@
   if (typeof globalThis === "undefined") { window.globalThis = window; }
 </script>
 <script src="js/hud.js"></script>
-<script src="js/snes9x2002.js"></script>
+<script src="js/snes9x2005.js"></script>
 <script src="js/adapter-snes.js"></script>
 <script>
 (function(){
@@ -277,8 +277,11 @@
     if (audioInitialized) return;
     try {
       var AC = window.AudioContext || window.webkitAudioContext;
-      try { audioCtx = new AC({ sampleRate: 44100 }); } catch (e1) { audioCtx = new AC(); }
+      audioCtx = new AC(); // taxa nativa do hardware (evita contexto nao-nativo que o M85 pode fechar)
       window.__atariAudioCtx = audioCtx;
+      var __realRate = (audioCtx && audioCtx.sampleRate) ? audioCtx.sampleRate : 44100;
+      window.__hostSampleRate = __realRate;
+      if (activeAdapter && activeAdapter.setHostSampleRate) activeAdapter.setHostSampleRate(__realRate);
       audioNode = audioCtx.createScriptProcessor(2048, 0, 2); // 2 canais de saida (estereo)
       window.__atariAudioNode = audioNode;
       audioGain = audioCtx.createGain();
@@ -311,6 +314,7 @@
 
   function resumeAudio() {
     if (!audioInitialized) initAudio();
+    if (audioCtx && audioCtx.state === "closed") { audioInitialized = false; audioCtx = null; initAudio(); }
     if (!audioCtx) return;
     if (audioCtx.state === "suspended" || audioCtx.state === "interrupted") {
       try { audioCtx.resume(); } catch (e) {}
@@ -521,10 +525,12 @@
         if (canvas.width !== sz.width || canvas.height !== sz.height) { canvas.width = sz.width; canvas.height = sz.height; }
         var tfps = activeAdapter.getTargetFps ? activeAdapter.getTargetFps() : 60.0;
         var stdName = activeAdapter.getVideoStandardName ? activeAdapter.getVideoStandardName() : "NTSC";
+        var hostRate = window.__hostSampleRate || (window.__atariAudioCtx && window.__atariAudioCtx.sampleRate) || 44100;
+        if (activeAdapter.setHostSampleRate) activeAdapter.setHostSampleRate(hostRate);
         if (window.HonestHUD) {
           HonestHUD.init({
             engine: activeAdapter.name + " [" + stdName + " " + SPEED_PRESETS[speedIdx].label + "]",
-            rom: it.name, targetFps: +(tfps * currentSpeedScale()).toFixed(1), sampleRate: 44100
+            rom: it.name, targetFps: +(tfps * currentSpeedScale()).toFixed(1), sampleRate: hostRate
           });
         }
         selScreen.style.display = "none";

@@ -4,18 +4,18 @@
 
 ![license](https://img.shields.io/badge/license-MIT-green)
 ![platform](https://img.shields.io/badge/platform-Samsung%20Tizen%206.5-1428A0)
-![core](https://img.shields.io/badge/core-snes9x2002-orange)
+![core](https://img.shields.io/badge/core-snes9x2005-orange)
 ![built with](https://img.shields.io/badge/built%20with-WebAssembly-654FF0)
 ![stars](https://img.shields.io/github/stars/mendes79/SNES-Tizen-Emulator?style=social)
 
-Jogue **Super Nintendo (SNES)** na sua **Smart TV Samsung**. Um aplicativo web independente (`.wgt`) instalado por **sideload** na TV, rodando o núcleo **snes9x2002** compilado para **WebAssembly** em velocidade cheia no SoC modesto da TV. Abre pela tela inicial do [lilauncher](https://github.com/mendes79/lilauncher) ou direto pela lista de aplicativos da TV.
+Jogue **Super Nintendo (SNES)** na sua **Smart TV Samsung**. Um aplicativo web independente (`.wgt`) instalado por **sideload** na TV, rodando o núcleo **snes9x2005** compilado para **WebAssembly** em velocidade cheia no SoC modesto da TV. Abre pela tela inicial do [lilauncher](https://github.com/mendes79/lilauncher) ou direto pela lista de aplicativos da TV.
 
 > Sem root. Sem binário nativo. Apenas a própria WebView da TV. Sem vínculo com a Nintendo ou a Samsung.
 
 |  |  |
 | :---: | :---: |
 | ![Jogo em velocidade cheia](img/posts/03-SNES-TZ-GAME.jpg) | ![Configuração interativa do joystick](img/posts/05-SES-TZ-JOY.jpg) |
-| _Jogo em velocidade cheia (snes9x2002 em WASM)_ | _Configuração interativa do joystick_ |
+| _Jogo em velocidade cheia (snes9x2005 em WASM)_ | _Configuração interativa do joystick_ |
 | ![Configurações](img/posts/04-SNES-TZ-CONFIG.jpg) | ![Abre pelo lilauncher](img/posts/01-SNES-TZ-ICON5.jpg) |
 | _Configurações: som e presets de velocidade_ | _Abre pela tela inicial do lilauncher_ |
 
@@ -26,12 +26,12 @@ _Vídeo de demonstração em breve._
 
 ## Por que existe
 
-As TVs Tizen da Samsung de 2022 trazem um motor web Chromium M85 travado, sem SIMD e sem threads no WebAssembly. A maioria das builds de emulador simplesmente não valida nem roda. Este projeto entrega uma **build enxuta de WebAssembly, single-thread e escalar** do snes9x2002 que roda em velocidade cheia nesse motor, dentro de uma interface pensada para a TV, controlada por gamepad.
+As TVs Tizen da Samsung de 2022 trazem um motor web Chromium M85 travado, sem SIMD e sem threads no WebAssembly. A maioria das builds de emulador simplesmente não valida nem roda. Este projeto entrega uma **build enxuta de WebAssembly, single-thread e escalar** do snes9x2005 que roda em velocidade cheia nesse motor, dentro de uma interface pensada para a TV, controlada por gamepad.
 
 ## O que é
 
 - Dispositivo alvo: Samsung 65BU8000 (2022, Crystal UHD), Tizen 6.5, motor web Chromium M85.
-- Núcleo: snes9x2002 recompilado para um módulo WebAssembly enxuto, single-thread e escalar (sem SIMD, sem threads), para validar e rodar no antigo Chromium M85.
+- Núcleo: snes9x2005 recompilado para um módulo WebAssembly enxuto, single-thread e escalar (sem SIMD, sem threads), para validar e rodar no antigo Chromium M85.
 - Entregue como pacote Tizen `.wgt`. É a mesma WebView usada pelo navegador da TV, então não há binário nativo do lado do app.
 
 ## Recursos
@@ -50,7 +50,7 @@ As TVs Tizen da Samsung de 2022 trazem um motor web Chromium M85 travado, sem SI
 ## Estrutura do repositório
 
 - `index.html` mais `js/` : a aplicação (UI, entrada, áudio, HUD, adaptador de frontend libretro).
-- `js/snes9x2002.wasm` / `js/snes9x2002.js` : o núcleo compilado.
+- `js/snes9x2005.wasm` / `js/snes9x2005.js` : o núcleo compilado.
 - `core/` : registro de build do núcleo (build reproduzível com Emscripten 3.1.56).
 - `img/` : papel de parede, ícone do app, diagrama do controle e overlays de destaque.
 - `roms_pub/` : ROMs de livre distribuição (publicadas).
@@ -86,7 +86,7 @@ Precisa do passo a passo detalhado com telas? Veja o guia de instalação: [docs
 ## Licença
 
 - Código original da aplicação: MIT (veja LICENSE).
-- Componentes de terceiros mantêm suas próprias licenças (veja THIRD-PARTY.md): o núcleo snes9x2002 sob a licença não comercial do Snes9x, e a 240p Test Suite sob GPL v2. Este projeto é livre e não comercial.
+- Componentes de terceiros mantêm suas próprias licenças (veja THIRD-PARTY.md): o núcleo snes9x2005 sob a licença não comercial do Snes9x, e a 240p Test Suite sob GPL v2. Este projeto é livre e não comercial.
 
 ## Aviso Legal
 
@@ -99,7 +99,7 @@ Este projeto é um emulador independente e não oficial, desenvolvido apenas par
 
 ## Créditos
 
-- [Núcleo snes9x2002](https://github.com/libretro/snes9x2002): os autores do [Snes9x](https://github.com/snes9xgit/snes9x) e a equipe do [libretro](https://www.libretro.com/).
+- [Núcleo snes9x2005](https://github.com/libretro/snes9x2005): os autores do [Snes9x](https://github.com/snes9xgit/snes9x) e a equipe do [libretro](https://www.libretro.com/).
 - [240p Test Suite](https://github.com/ArtemioUrbina/240pTestSuite): Artemio Urbina e colaboradores.
 - Foto do controle: [Ravi Palwe no Unsplash](https://unsplash.com/photos/_Vrw58wU4aI) (Licença Unsplash).
 - Harness de referência do GameBoy e o projeto [lilauncher](https://github.com/mendes79/lilauncher), no qual este emulador se encaixa.
