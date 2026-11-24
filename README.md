@@ -108,6 +108,7 @@ This project is an independent, unofficial emulator developed for educational pu
 
 - [lilauncher](https://github.com/mendes79/lilauncher) — the custom Samsung TV home screen this emulator launches from.
 - [Atari 2600 Tizen Emulator](https://github.com/mendes79/Atari-2600-Tizen-Emulator) — same approach, Atari 2600 core.
+- [NES Tizen Emulator](https://github.com/mendes79/NES-Tizen-Emulator) — same approach, NES (FCEUmm) core.
 - [Videokê TV](https://github.com/mendes79/videoke-tv) — karaoke station for the TV, real-time mobile queue via QR Code, launched from lilauncher.
 
 Portuguese version: see [README.pt-BR.md](README.pt-BR.md).
